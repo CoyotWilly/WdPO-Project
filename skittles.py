@@ -27,6 +27,7 @@ purple = 0
 img = cv2.imread('data/03.jpg', cv2.IMREAD_COLOR)
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+
 def green_count():
     blur = 0
 
@@ -47,11 +48,20 @@ def green_count():
     cnt_g, _ = cv2.findContours(dilatet, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # final result display and human check
-    print('Counted=', len(cnt_g))
+    counted = len(cnt_g)
+    for cnt in cnt_g:
+        area = cv2.contourArea(cnt)
+        if area < 250.0 and counted > 0:
+            counted = counted - 1
+        print(area)
+
+    print('Counted=', counted)
     g_mask_final = cv2.cvtColor(mask_open_g, cv2.COLOR_GRAY2BGR)
     g_final = cv2.addWeighted(g_mask_final, 0.5, img, 0.5, 0)
 
-    cv2.imshow('close mask', g_final)
+
+    # cv2.imshow('close mask', g_final)
+    # cv2.imwrite('test.jpg', g_final)
     cv2.waitKey(0)
 
 
@@ -135,8 +145,9 @@ def purple_count():
     cv2.imshow('close mask', p_final)
     cv2.waitKey(0)
 
+
 def call_counting():
-    purple_count()
+    green_count()
 
 
 if __name__ == '__main__':
