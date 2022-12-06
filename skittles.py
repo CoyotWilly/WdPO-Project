@@ -29,7 +29,7 @@ def count_cnts(cnts):
     area_array = np.array([0])
     for cnt in cnts:
         area = cv2.contourArea(cnt)
-        print(area)
+        # print(area)
         area_array = np.append(area_array, area)
     area_array = np.delete(area_array, 0)
     return area_array
@@ -40,8 +40,8 @@ def color_count_check(area_arr, counted):
     avg = np.average(area_arr)
     lb = np.abs(avg - std)
     ub = avg + std
-    print('lb=', lb)
-    print('ub=', ub)
+    # print('lb=', lb)
+    # print('ub=', ub)
 
     for field in area_arr:
         if field < lb and counted > 0:
@@ -59,7 +59,7 @@ def green_count():
         blur = cv2.medianBlur(hsv, 11)
 
     # morphology
-    mask_g = cv2.inRange(blur, (35, 199, 0), (69, 255, 255))
+    mask_g = cv2.inRange(blur, (35, 189, 0), (69, 255, 255))
     ker_g = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12, 12))
     mask_close_g = cv2.morphologyEx(mask_g, cv2.MORPH_CLOSE, ker_g)
     mask_open_g = cv2. morphologyEx(mask_close_g, cv2.MORPH_OPEN, ker_g)
@@ -72,9 +72,6 @@ def green_count():
 
     # final result display and human check
     counted = len(cnt_g)
-
-    # area_arr = count_cnts(cnt_g)
-    # counted = color_count_check(area_arr, counted)
 
     print('Counted=', counted)
     g_mask_final = cv2.cvtColor(mask_open_g, cv2.COLOR_GRAY2BGR)
@@ -179,4 +176,5 @@ if __name__ == '__main__':
             img_path = "data/" + str(i) + ".jpg"
         img = cv2.imread(img_path, cv2.IMREAD_COLOR)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        print("On pic " + str(i) + ":")
         call_counting()
