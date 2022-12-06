@@ -6,11 +6,11 @@ import numpy as np
 # aggressive_purple = [(71, 95, 0), (179, 255, 255)]
 # normal_purple = [(151, 36, 0), (179, 255, 255)]
 #
-# yellow tres setup
+# green tres setup
 # aggressive_yellow = [(35, 189, 0), (69, 255, 255)]
 # normal_yellow = [(35, 82, 0), (69, 255, 255)]
 #
-# green tres setup
+# yellow tres setup
 # aggressive_green = [(0, 220, 116), (32, 255, 255)]
 # normal_green = [(0, 137, 102), (30, 255, 255)]
 #
@@ -59,7 +59,7 @@ def green_count():
         blur = cv2.medianBlur(hsv, 11)
 
     # morphology
-    mask_g = cv2.inRange(blur, (35, 189, 0), (69, 255, 255))
+    mask_g = cv2.inRange(blur, (35, 199, 0), (69, 255, 255))
     ker_g = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12, 12))
     mask_close_g = cv2.morphologyEx(mask_g, cv2.MORPH_CLOSE, ker_g)
     mask_open_g = cv2. morphologyEx(mask_close_g, cv2.MORPH_OPEN, ker_g)
