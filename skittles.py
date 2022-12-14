@@ -1,3 +1,4 @@
+import json
 import cv2
 import numpy as np
 
@@ -17,12 +18,6 @@ import numpy as np
 # red tres setup
 # aggressive_red = [(170, 102, 153), (179, 255, 255)]
 # normal_red = [(175, 46, 0), (179, 255, 255)]
-#
-# DONT TOUCH IT:
-red = 0
-yellow = 0
-green = 0
-purple = 0
 
 
 def count_cnts(cnts):
@@ -73,7 +68,7 @@ def green_count():
     # final result display and human check
     counted = len(cnt_g)
 
-    print('Counted=', counted)
+    # print('Counted=', counted)
     g_mask_final = cv2.cvtColor(mask_open_g, cv2.COLOR_GRAY2BGR)
     g_final = cv2.addWeighted(g_mask_final, 0.5, img, 0.5, 0)
 
@@ -81,7 +76,7 @@ def green_count():
     # cv2.imshow('close mask', g_final)
     # cv2.imwrite('test.jpg', g_final)
     # cv2.waitKey(0)
-
+    return counted
 
 def yellow_count():
     blur = 0
@@ -90,9 +85,9 @@ def yellow_count():
 
     # morphology
     mask_y = cv2.inRange(blur, (0, 220, 116), (32, 255, 255))
-    ker_y = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12,12))
-    mask_close_y = cv2.morphologyEx(mask_y, cv2.MORPH_CLOSE, ker_y)
-    mask_open_y = cv2.morphologyEx(mask_close_y, cv2.MORPH_OPEN, ker_y)
+    # ker_y = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12,12))
+    mask_close_y = cv2.morphologyEx(mask_y, cv2.MORPH_CLOSE, (1, 1))
+    mask_open_y = cv2.morphologyEx(mask_close_y, cv2.MORPH_OPEN, (7, 7))
     # cv2.imshow('maks', mask_open_y)
 
     # object counting
@@ -150,6 +145,7 @@ def purple_count():
     # cv2.imshow('maks', mask_open_p)
 
     # object counting
+
     ker_p = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     dilatet = cv2.dilate(mask_open_p, ker_p, iterations=1)
 
@@ -169,12 +165,22 @@ def call_counting():
 
 
 if __name__ == '__main__':
-    for i in range(35):
+    file = open('the_truth.json')
+    data = json.load(file)
+    val = 0
+    sum = 0
+    for i in range(39):
         if i < 10:
             img_path = "data/0" + str(i) + ".jpg"
+            val = "0"+ str(i) + ".jpg"
         else:
             img_path = "data/" + str(i) + ".jpg"
+            val = str(i) + ".jpg"
         img = cv2.imread(img_path, cv2.IMREAD_COLOR)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        print("On pic " + str(i) + ":")
-        call_counting()
+        perfect = data[val]["green"]
+        return_val = green_count()
+        sum = sum + np.abs(perfect - return_val)
+        if return_val != perfect:
+            print('blad na zdjeciu '+ str(i))
+    print(sum)
