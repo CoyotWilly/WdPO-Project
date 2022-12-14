@@ -54,10 +54,11 @@ def green_count():
         blur = cv2.medianBlur(hsv, 11)
 
     # morphology
-    mask_g = cv2.inRange(blur, (35, 189, 0), (69, 255, 255))
-    ker_g = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12, 12))
-    mask_close_g = cv2.morphologyEx(mask_g, cv2.MORPH_CLOSE, ker_g)
-    mask_open_g = cv2. morphologyEx(mask_close_g, cv2.MORPH_OPEN, ker_g)
+    mask_g = cv2.inRange(blur, (35, 189, 0), (69, 255, 180))
+    # ker_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
+    ker_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12, 12))
+    mask_close_g = cv2.morphologyEx(mask_g, cv2.MORPH_CLOSE, ker_open)
+    mask_open_g = cv2. morphologyEx(mask_close_g, cv2.MORPH_OPEN, ker_open)
 
     # object counting
     ker_g = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
@@ -165,6 +166,9 @@ def call_counting():
 
 
 if __name__ == '__main__':
+    # img = cv2.imread('data/00.jpg', cv2.IMREAD_COLOR)
+    # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # green_count()
     file = open('the_truth.json')
     data = json.load(file)
     val = 0
