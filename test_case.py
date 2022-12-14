@@ -1,67 +1,33 @@
-from __future__ import print_function
-import cv2 as cv
+import cv2
 import numpy as np
-import argparse
-
-src = None
-erosion_size = 0
-max_elem = 2
-max_kernel_size = 21
-title_trackbar_element_shape = 'Element:\n 0: Rect \n 1: Cross \n 2: Ellipse'
-title_trackbar_kernel_size = 'Kernel size:\n 2n +1'
-title_erosion_window = 'Erosion Demo'
-title_dilation_window = 'Dilation Demo'
 
 
-def main(image):
-    global src
-    src = cv.imread(cv.samples.findFile(image))
-    if src is None:
-        print('Could not open or find the image: ', image)
-        exit(0)
-    cv.namedWindow(title_erosion_window)
-    cv.createTrackbar(title_trackbar_element_shape, title_erosion_window, 0, max_elem, erosion)
-    cv.createTrackbar(title_trackbar_kernel_size, title_erosion_window, 0, max_kernel_size, erosion)
-    cv.namedWindow(title_dilation_window)
-    cv.createTrackbar(title_trackbar_element_shape, title_dilation_window, 0, max_elem, dilatation)
-    cv.createTrackbar(title_trackbar_kernel_size, title_dilation_window, 0, max_kernel_size, dilatation)
-    erosion(0)
-    dilatation(0)
-    cv.waitKey()
+def count_obj(img):
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    dilatet = cv2.dilate(img, kernel, iterations=1)
+
+    # contours
+    contours, _ = cv2.findContours(dilatet, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
+    print(len(contours))
+    cv2.imshow('counter call', img)
 
 
-# optional mapping of values with morphological shapes
-def morph_shape(val):
-    if val == 0:
-        return cv.MORPH_RECT
-    elif val == 1:
-        return cv.MORPH_CROSS
-    elif val == 2:
-        return cv.MORPH_ELLIPSE
+# (hMin = 23 , sMin = 36, vMin = 63), (hMax = 179 , sMax = 255, vMax = 255)
+img_path = 'data/01.jpg'
+img = cv2.imread(img_path, cv2.IMREAD_COLOR)
+img = cv2.resize(img, (768, 1020))
 
+grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+blur = cv2.GaussianBlur(grey, (3, 3), 0)
 
-def erosion(val):
-    erosion_size = cv.getTrackbarPos(title_trackbar_kernel_size, title_erosion_window)
-    erosion_shape = morph_shape(cv.getTrackbarPos(title_trackbar_element_shape, title_erosion_window))
+t_inv = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 4)
+canny = cv2.Canny(t_inv, 100, 200)
+mask = cv2.bitwise_and(img, img, mask=canny)
 
-    element = cv.getStructuringElement(erosion_shape, (2 * erosion_size + 1, 2 * erosion_size + 1),
-                                       (erosion_size, erosion_size))
+count_obj(mask)
 
-    erosion_dst = cv.erode(src, element)
-    cv.imshow(title_erosion_window, erosion_dst)
+cv2.imshow('mask', mask)
+cv2.imshow('testy', canny)
+cv2.waitKey()
 
-
-def dilatation(val):
-    dilatation_size = cv.getTrackbarPos(title_trackbar_kernel_size, title_dilation_window)
-    dilation_shape = morph_shape(cv.getTrackbarPos(title_trackbar_element_shape, title_dilation_window))
-    element = cv.getStructuringElement(dilation_shape, (2 * dilatation_size + 1, 2 * dilatation_size + 1),
-                                       (dilatation_size, dilatation_size))
-    dilatation_dst = cv.dilate(src, element)
-    cv.imshow(title_dilation_window, dilatation_dst)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Code for Eroding and Dilating tutorial.')
-    parser.add_argument('--input', help='Path to input image.', default='data/00.jpg')
-    args = parser.parse_args()
-    main(args.input)

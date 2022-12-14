@@ -1,16 +1,16 @@
 import cv2
-import json
+import numpy as np
 
 # VALUES FOR FUTURE IMPLEMENTATION
 # purple tres setup
 # aggressive_purple = [(71, 95, 0), (179, 255, 255)]
 # normal_purple = [(151, 36, 0), (179, 255, 255)]
 #
-# yellow tres setup
+# green tres setup
 # aggressive_yellow = [(35, 189, 0), (69, 255, 255)]
 # normal_yellow = [(35, 82, 0), (69, 255, 255)]
 #
-# green tres setup
+# yellow tres setup
 # aggressive_green = [(0, 220, 116), (32, 255, 255)]
 # normal_green = [(0, 137, 102), (30, 255, 255)]
 #
@@ -25,8 +25,31 @@ green = 0
 purple = 0
 
 
-# img = cv2.imread('data/03.jpg', cv2.IMREAD_COLOR)
-# hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+def count_cnts(cnts):
+    area_array = np.array([0])
+    for cnt in cnts:
+        area = cv2.contourArea(cnt)
+        # print(area)
+        area_array = np.append(area_array, area)
+    area_array = np.delete(area_array, 0)
+    return area_array
+
+
+def color_count_check(area_arr, counted):
+    std = np.std(area_arr)
+    avg = np.average(area_arr)
+    lb = np.abs(avg - std)
+    ub = avg + std
+    # print('lb=', lb)
+    # print('ub=', ub)
+
+    for field in area_arr:
+        if field < lb and counted > 0:
+            counted = counted - 1
+        elif field > ub:
+            counted = counted + 1
+    return counted
+
 
 def green_count():
     blur = 0
@@ -48,12 +71,16 @@ def green_count():
     cnt_g, _ = cv2.findContours(dilatet, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # final result display and human check
-    print('Counted=', len(cnt_g))
+    counted = len(cnt_g)
+
+    print('Counted=', counted)
     g_mask_final = cv2.cvtColor(mask_open_g, cv2.COLOR_GRAY2BGR)
     g_final = cv2.addWeighted(g_mask_final, 0.5, img, 0.5, 0)
 
-    cv2.imshow('close mask', g_final)
-    cv2.waitKey(0)
+
+    # cv2.imshow('close mask', g_final)
+    # cv2.imwrite('test.jpg', g_final)
+    # cv2.waitKey(0)
 
 
 def yellow_count():
@@ -137,19 +164,17 @@ def purple_count():
     cv2.waitKey(0)
 
 
-if __name__ == '__main__':
-    f = open('the_truth.json')
-    data = json.load(f)
+def call_counting():
+    green_count()
 
-    for i in range(data):
-        img_path = ''
-        val = 0
+
+if __name__ == '__main__':
+    for i in range(35):
         if i < 10:
-            img_path = 'data/0'+ str(i) +'.jpg'
-            val = data['0'+str(i)+'.jpg']
+            img_path = "data/0" + str(i) + ".jpg"
         else:
-            img_path = 'data/'+ str(i) + '.jpg'
-            val = data[str(i)+'.jpg']
+            img_path = "data/" + str(i) + ".jpg"
         img = cv2.imread(img_path, cv2.IMREAD_COLOR)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        green_count()
+        print("On pic " + str(i) + ":")
+        call_counting()
