@@ -6,7 +6,7 @@ def nothing(x):
 
 # Load image
 image = cv2.imread('data/00.jpg')
-image = cv2.resize(image, (1080, 1920))
+image = cv2.resize(image, (900, 600))
 # Create a window
 cv2.namedWindow('image')
 
@@ -44,9 +44,7 @@ while(1):
 
     # Convert to HSV format and color threshold
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    blur = 0
-    for i in range(5):
-        blur = cv2.medianBlur(hsv, 11)
+    blur = cv2.medianBlur(hsv, 11)
     mask = cv2.inRange(blur, lower, upper)
     result = cv2.bitwise_and(image, image, mask=mask)
 
