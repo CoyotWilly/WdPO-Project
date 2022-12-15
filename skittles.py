@@ -21,6 +21,7 @@ import numpy as np
 
 
 def count_cnts(cnts):
+    # GREEN % val = 0.00005
     area_array = np.array([0])
     shape = np.shape(img)
     condition = (shape[0] * shape[1]) * 0.00005
@@ -58,10 +59,9 @@ def green_count():
 
     # morphology
     mask_g = cv2.inRange(blur, (35, 189, 0), (69, 255, 190))
-    # ker_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
-    ker_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12, 12))
-    mask_close_g = cv2.morphologyEx(mask_g, cv2.MORPH_CLOSE, ker_open)
-    mask_open_g = cv2. morphologyEx(mask_close_g, cv2.MORPH_OPEN, ker_open)
+    ker = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12, 12))
+    mask_close_g = cv2.morphologyEx(mask_g, cv2.MORPH_CLOSE, ker)
+    mask_open_g = cv2. morphologyEx(mask_close_g, cv2.MORPH_OPEN, ker)
 
     # object counting
     ker_g = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
@@ -79,7 +79,7 @@ def green_count():
 
 
     # cv2.imshow('close mask', g_final)
-    cv2.imwrite('test.jpg', g_final)
+    # cv2.imwrite('test.jpg', g_final)
     # cv2.waitKey(0)
     return counted
 
@@ -90,25 +90,28 @@ def yellow_count():
 
     # morphology
     mask_y = cv2.inRange(blur, (0, 220, 116), (32, 255, 255))
-    # ker_y = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12,12))
-    mask_close_y = cv2.morphologyEx(mask_y, cv2.MORPH_CLOSE, (1, 1))
-    mask_open_y = cv2.morphologyEx(mask_close_y, cv2.MORPH_OPEN, (7, 7))
+    ker_y_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
+    ker_y_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    mask_close_y = cv2.morphologyEx(mask_y, cv2.MORPH_CLOSE, ker_y_close)
+    mask_open_y = cv2.morphologyEx(mask_close_y, cv2.MORPH_OPEN, ker_y_open)
     # cv2.imshow('maks', mask_open_y)
 
     # object counting
-    ker_y = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    ker_y = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
     dilatet = cv2.dilate(mask_open_y, ker_y, iterations=1)
 
     cnt_y, _ = cv2.findContours(dilatet, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # final result display and human check
-    print('Counted=', len(cnt_y))
+    counted = len(count_cnts(cnt_y))
+    # print('Counted=', counted)
     y_mask_final = cv2.cvtColor(mask_open_y, cv2.COLOR_GRAY2BGR)
     y_final = cv2.addWeighted(y_mask_final, 0.5, img, 0.5, 0)
 
-    cv2.imshow('close mask', y_final)
-    cv2.waitKey(0)
-
+    # cv2.imshow('close mask', y_final)
+    # cv2.imwrite('test.jpg', y_final)
+    # cv2.waitKey(0)
+    return counted
 
 def red_count():
     blur = 0
@@ -118,23 +121,26 @@ def red_count():
     # morphology
     mask_r = cv2.inRange(blur, (170, 102, 153), (179, 255, 255))
     ker_r = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
-    mask_close_r = cv2.morphologyEx(mask_r, cv2.MORPH_CLOSE, ker_r)
-    mask_open_r = cv2.morphologyEx(mask_close_r, cv2.MORPH_OPEN, ker_r)
+    mask_close_r = cv2.morphologyEx(mask_r, cv2.MORPH_CLOSE, (1, 1))
+    mask_open_r = cv2.morphologyEx(mask_close_r, cv2.MORPH_OPEN, (7, 7))
     # cv2.imshow('maks', mask_open_r)
 
     # object counting
-    ker_r = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    ker_r = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
     dilatet = cv2.dilate(mask_open_r, ker_r, iterations=1)
 
     cnt_r, _ = cv2.findContours(dilatet, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # final result display and human check
-    print('Counted=', len(cnt_r))
+    counted = len(count_cnts(cnt_r))
+    print('Counted=', counted)
     r_mask_final = cv2.cvtColor(mask_open_r, cv2.COLOR_GRAY2BGR)
     r_final = cv2.addWeighted(r_mask_final, 0.5, img, 0.5, 0)
 
-    cv2.imshow('close mask', r_final)
-    cv2.waitKey(0)
+    # cv2.imshow('close mask', r_final)
+    cv2.imwrite('test.jpg', r_final)
+    # cv2.waitKey(0)
+    return counted
 
 
 def purple_count():
@@ -167,12 +173,15 @@ def purple_count():
 
 def call_counting():
     green_count()
+    yellow_count()
+    red_count()
 
 
 if __name__ == '__main__':
-    # img = cv2.imread('data/03.jpg', cv2.IMREAD_COLOR)
+    # pic 20
+    # img = cv2.imread('data/07.jpg', cv2.IMREAD_COLOR)
     # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    # green_count()
+    # red_count()
     file = open('the_truth.json')
     data = json.load(file)
     val = 0
@@ -186,8 +195,8 @@ if __name__ == '__main__':
             val = str(i) + ".jpg"
         img = cv2.imread(img_path, cv2.IMREAD_COLOR)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        perfect = data[val]["green"]
-        return_val = green_count()
+        perfect = data[val]["yellow"]
+        return_val = yellow_count()
         sum = sum + np.abs(perfect - return_val)
         if return_val != perfect:
             print('blad na zdjeciu '+ str(i))
