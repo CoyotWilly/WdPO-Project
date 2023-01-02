@@ -168,15 +168,28 @@ def purple_count():
     # final result display and human check
     counted = len(count_cnts(cnt_p))
     # counted = len(cnt_p)
-    print('Counted=', counted)
+    # print('Counted=', counted)
     p_mask_final = cv2.cvtColor(mask_p, cv2.COLOR_GRAY2BGR)
     p_final = cv2.addWeighted(p_mask_final, 0.5, img, 0.5, 0)
 
-    cv2.imshow('final', p_final)
+    # cv2.imshow('final', p_final)
     # cv2.imwrite('test.jpg', p_final)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
     return counted
 
+
+def purple_count_v2():
+    # er=4 dil=12
+    # width = int(img.shape[0] * 0.2)
+    # height = int(img.shape[1] * 0.2)
+    # res = cv2.resize(hsv, (height, width), cv2.INTER_AREA)
+    mask_range = cv2.inRange(hsv, (162, 82, 0), (176, 235, 121))
+    mask_e = cv2.erode(mask_range, (4,4))
+    mask_dil = cv2.dilate(mask_e, (12,12))
+
+    cnt, _ = cv2.findContours(mask_dil, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    counted = len(count_cnts(cnt))
+    return counted
 
 def call_counting():
     # GREEN 97.5%
@@ -191,25 +204,28 @@ def call_counting():
 
 if __name__ == '__main__':
     # pic 20 17 32
-    img = cv2.imread('data/00.jpg', cv2.IMREAD_COLOR)
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # img = cv2.imread('data/00.jpg', cv2.IMREAD_COLOR)
+    # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    file = open('the_truth.json')
+    data = json.load(file)
+    file.close()
+
+    val = 0
+    sum = 0
+    for i in range(39):
+        if i < 10:
+            img_path = "data/0" + str(i) + ".jpg"
+            val = "0"+ str(i) + ".jpg"
+        else:
+            img_path = "data/" + str(i) + ".jpg"
+            val = str(i) + ".jpg"
+        img = cv2.imread(img_path, cv2.IMREAD_COLOR)
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        perfect = data[val]["purple"]
+        return_val = purple_count_v2()
+        sum = sum + np.abs(perfect - return_val)
+        if return_val != perfect:
+            print('blad na zdjeciu '+ str(i))
+    print(sum)
     purple_count()
-    # file = open('the_truth.json')
-    # data = json.load(file)
-    # val = 0
-    # sum = 0
-    # for i in range(39):
-    #     if i < 10:
-    #         img_path = "data/0" + str(i) + ".jpg"
-    #         val = "0"+ str(i) + ".jpg"
-    #     else:
-    #         img_path = "data/" + str(i) + ".jpg"
-    #         val = str(i) + ".jpg"
-    #     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
-    #     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    #     perfect = data[val]["purple"]
-    #     return_val = purple_count()
-    #     sum = sum + np.abs(perfect - return_val)
-    #     if return_val != perfect:
-    #         print('blad na zdjeciu '+ str(i))
-    # print(sum)
+
