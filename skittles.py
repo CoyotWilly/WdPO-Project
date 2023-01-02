@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 
-def count_cnts(cnts, color_called):
+def count_cnts(cnts: list, color_called: str) -> np.ndarray:
     area_array = np.array([0])
     shape = np.shape(img)
     if color_called == "purple":
