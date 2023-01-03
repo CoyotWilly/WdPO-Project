@@ -147,5 +147,4 @@ def main(data_path: Path, output_file_path: Path):
 
 
 if __name__ == '__main__':
-    # main()
-    print(detect('data/25.jpg'))
+    main()
